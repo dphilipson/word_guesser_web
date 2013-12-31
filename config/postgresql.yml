@@ -1,0 +1,24 @@
+Default: &defaults
+  user: word-guesser
+  password: word-guesser
+  host: localhost
+  port: 5432
+  database: word-guesser
+  poolsize: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: word-guesser_test
+  <<: *defaults
+
+Staging:
+  database: word-guesser_staging
+  poolsize: 100
+  <<: *defaults
+
+Production:
+  database: word-guesser_production
+  poolsize: 100
+  <<: *defaults

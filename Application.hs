@@ -23,6 +23,11 @@ import System.Log.FastLogger (newLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
 import Data.Default (def)
 import Yesod.Core.Types (loggerSet, Logger (Logger))
+import qualified Data.HashMap.Strict as M
+import qualified Data.Aeson.Types as AT
+#ifndef DEVELOPMENT
+import qualified Web.Heroku
+#endif
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -60,8 +65,15 @@ makeFoundation :: AppConfig DefaultEnv Extra -> IO App
 makeFoundation conf = do
     manager <- newManager conduitManagerSettings
     s <- staticSite
-    dbconf <- withYamlEnvironment "config/sqlite.yml" (appEnv conf)
-              Database.Persist.loadConfig >>=
+    hconfig <- loadHerokuConfig
+    let configYml =
+#ifdef DEVELOPMENT
+            "config/sqlite.yml"
+#else
+            "config/postgresql.yml"
+#endif
+    dbconf <- withYamlEnvironment configYml (appEnv conf)
+              (Database.Persist.loadConfig . combineMappings hconfig) >>=
               Database.Persist.applyEnv
     p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
 
@@ -77,6 +89,27 @@ makeFoundation conf = do
         (messageLoggerSource foundation logger)
 
     return foundation
+
+#ifndef DEVELOPMENT
+canonicalizeKey :: (Text, val) -> (Text, val)
+canonicalizeKey ("dbname", val) = ("database", val)
+canonicalizeKey pair = pair
+
+toMapping :: [(Text, Text)] -> AT.Value
+toMapping = AT.Object . M.fromList . map (\(key, val) -> (key, AT.String val))
+#endif
+
+combineMappings :: AT.Value -> AT.Value -> AT.Value
+combineMappings (AT.Object m1) (AT.Object m2) = AT.Object $ M.union m1 m2
+combineMappings _ _ = error "Data.Object is not a Mapping."
+
+loadHerokuConfig :: IO AT.Value
+loadHerokuConfig =
+#ifdef DEVELOPMENT
+    return $ AT.Object M.empty
+#else
+    Web.Heroku.dbConnParams >>= return . toMapping . map canonicalizeKey
+#endif
 
 -- for yesod devel
 getApplicationDev :: IO (Int, Application)
