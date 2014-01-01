@@ -1,0 +1,7 @@
+RED
+ Orange
+YelloW
+green
+blue
+indigo
+  violet

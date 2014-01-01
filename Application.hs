@@ -28,6 +28,7 @@ import qualified Data.Aeson.Types as AT
 #ifndef DEVELOPMENT
 import qualified Web.Heroku
 #endif
+import Game.Lexicon
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -81,8 +82,11 @@ makeFoundation conf = do
     loggerSet' <- newLoggerSet defaultBufSize Nothing
     (getter, _) <- clockDateCacher
 
+    lexicon <-
+        loadLexicon "lexicons/color_secrets.txt" "lexicons/color_guesses.txt"
+
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger
+        foundation = App conf s p manager dbconf logger lexicon
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

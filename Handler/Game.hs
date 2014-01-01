@@ -2,6 +2,7 @@ module Handler.Game where
 
 import Import
 import Game.GameState
+import Game.Lexicon
 import Text.Shakespeare.Text
 
 getGameR :: Handler Html
@@ -25,8 +26,9 @@ loadGameEntity = do
     case mGameEntity of
         Just entity -> return entity
         Nothing -> do
-            -- For now, the words is always the same.
-            let newGame = Game "swordfish"
+            lexicon <- lift getLexicon
+            newSecret <- liftIO $ randomSecret lexicon
+            let newGame = Game newSecret
             newGid <- insert newGame
             return $ Entity newGid newGame 
 
@@ -48,7 +50,13 @@ postGameR :: Handler Html
 postGameR = do
     ((result, _), _) <- runFormPost guessForm
     case result of
-        FormSuccess word -> runDB $ updateWithGuess word
+        FormSuccess rawWord -> do
+            let word = canonicalize rawWord
+            lexicon <- getLexicon
+            if isValidGuess word lexicon
+                then runDB $ updateWithGuess word
+                else setMessage $ toHtml
+                    [st|I don't know the word "#{word}". Try again.|]
         _ -> return ()
     redirect GameR
 
