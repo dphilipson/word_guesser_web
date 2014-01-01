@@ -4,31 +4,36 @@ import Import
 import Game.GameState
 import Game.Lexicon
 import Text.Shakespeare.Text
+import Yesod.Auth
 
 getGameR :: Handler Html
 getGameR = do
-    gameState <- runDB $ loadGameState
-    let latestMessage = gameStateMessage gameState    
-    (formWidget, formEnctype) <- generateFormPost guessForm
-    defaultLayout $(widgetFile "game")
+    mUserId <- maybeAuthId
+    case mUserId of
+        Just userId -> do
+            gameState <- runDB $ loadGameState userId
+            let latestMessage = gameStateMessage gameState    
+            (formWidget, formEnctype) <- generateFormPost guessForm
+            defaultLayout $(widgetFile "game")
+        Nothing -> redirect $ AuthR LoginR
 
-loadGameState :: YesodDB App GameState
-loadGameState = do
-    -- Assume just one game for now.
-    gameEntity@(Entity gid _) <- loadGameEntity
+loadGameState :: UserId -> YesodDB App GameState
+loadGameState userId = do
+    -- Assume just one game per user for now.
+    gameEntity@(Entity gid _) <- loadGameEntity userId
     eLastGuess <- selectFirst [GuessGame ==. gid] [Desc GuessCount, LimitTo 1]
-    let lastGuess = entityVal <$> eLastGuess
+    let lastGuess = fmap entityVal eLastGuess
     return $ GameState gameEntity lastGuess
     
-loadGameEntity :: YesodDB App (Entity Game)
-loadGameEntity = do
-    mGameEntity <- selectFirst ([] :: [Filter Game]) []
+loadGameEntity :: UserId -> YesodDB App (Entity Game)
+loadGameEntity userId = do
+    mGameEntity <- getBy $ UniqueGame userId
     case mGameEntity of
         Just entity -> return entity
         Nothing -> do
             lexicon <- lift getLexicon
             newSecret <- liftIO $ randomSecret lexicon
-            let newGame = Game newSecret
+            let newGame = Game userId newSecret
             newGid <- insert newGame
             return $ Entity newGid newGame 
 
@@ -48,21 +53,25 @@ guessForm = renderDivs $ areq textField "Guess" Nothing
 
 postGameR :: Handler Html
 postGameR = do
-    ((result, _), _) <- runFormPost guessForm
-    case result of
-        FormSuccess rawWord -> do
-            let word = canonicalize rawWord
-            lexicon <- getLexicon
-            if isValidGuess word lexicon
-                then runDB $ updateWithGuess word
-                else setMessage $ toHtml
-                    [st|I don't know the word "#{word}". Try again.|]
-        _ -> return ()
+    mUserId <- maybeAuthId
+    case mUserId of
+        Just userId -> do
+            ((result, _), _) <- runFormPost guessForm
+            case result of
+                FormSuccess rawWord -> do
+                    let word = canonicalize rawWord
+                    lexicon <- getLexicon
+                    if isValidGuess word lexicon
+                        then runDB $ updateWithGuess userId word
+                        else setMessage $ toHtml
+                            [st|I don't know the word "#{word}". Try again.|]
+                _ -> return ()
+        Nothing -> return ()
     redirect GameR
 
-updateWithGuess :: Text -> YesodDB App ()
-updateWithGuess word = do
-    gameState <- loadGameState
+updateWithGuess :: UserId -> Text -> YesodDB App ()
+updateWithGuess userId word = do
+    gameState <- loadGameState userId
     let c = stateGuessCount gameState + 1
         gameId = entityKey $ stateGameEntity gameState
     insert_ $ Guess gameId word c
