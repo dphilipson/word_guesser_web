@@ -73,11 +73,13 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
-            addScriptRemote "http://code.jquery.com/jquery-1.10.2.min.js"
+            addScriptRemote "//code.jquery.com/jquery-1.10.2.min.js"
             $(combineStylesheets 'StaticR
                 [ css_normalize_css
-                , css_bootstrap_css
                 ])
+            addStylesheetRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
+            addStylesheetRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css"
+            addScriptRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
