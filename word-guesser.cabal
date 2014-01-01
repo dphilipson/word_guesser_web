@@ -20,6 +20,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Game.GameState
+                     Game.Lexicon
                      Handler.Home
                      Handler.Game
 
@@ -75,6 +76,9 @@ library
                  , wai-logger                    >= 2.0
                  , heroku
                  , unordered-containers
+                 , random
+                 , containers
+                 , vector
 
 executable         word-guesser
     if flag(library-only)
