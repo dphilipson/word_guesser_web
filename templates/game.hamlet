@@ -1,4 +1,5 @@
 <p>#{latestMessage}
-<form method=post target=@{GameR} enctype=#{formEnctype}>
-  ^{formWidget}
-  <input type=submit value="Guess">
+$if not $ stateIsComplete gameState
+  <form method=post target=@{GameR} enctype=#{formEnctype}>
+    ^{formWidget}
+    <input type=submit value="Guess">

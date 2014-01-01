@@ -64,5 +64,5 @@ updateWithGuess :: Text -> YesodDB App ()
 updateWithGuess word = do
     gameState <- loadGameState
     let c = stateGuessCount gameState + 1
-        Entity gameId _ = stateGameEntity gameState
+        gameId = entityKey $ stateGameEntity gameState
     insert_ $ Guess gameId word c

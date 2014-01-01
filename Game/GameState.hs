@@ -17,3 +17,6 @@ stateGuessCount = (maybe 0 guessCount) . stateLatestGuess
 
 stateLatestWord :: GameState -> Maybe Text
 stateLatestWord = (guessWord <$>) . stateLatestGuess
+
+stateIsComplete :: GameState -> Bool
+stateIsComplete state = stateLatestWord state == Just (stateSecret state)
