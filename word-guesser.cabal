@@ -19,6 +19,7 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
+                     Game.GameState
                      Handler.Home
                      Handler.Game
 

@@ -1,14 +1,8 @@
 module Handler.Game where
 
 import Import
+import Game.GameState
 import Text.Shakespeare.Text
-
-data GameState = GameState { stateGameEntity :: Entity Game
-                           , stateLatestGuess :: Maybe Guess
-                           }
-
-stateSecret :: GameState -> Text
-stateSecret (GameState {stateGameEntity = Entity _ (Game {gameSecret = secret})}) = secret
 
 getGameR :: Handler Html
 getGameR = do
@@ -20,10 +14,10 @@ getGameR = do
 loadGameState :: YesodDB App GameState
 loadGameState = do
     -- Assume just one game for now.
-    gEntity@(Entity gid _) <- loadGameEntity
+    gameEntity@(Entity gid _) <- loadGameEntity
     eLastGuess <- selectFirst [GuessGame ==. gid] [Desc GuessCount, LimitTo 1]
     let lastGuess = entityVal <$> eLastGuess
-    return $ GameState gEntity lastGuess
+    return $ GameState gameEntity lastGuess
     
 loadGameEntity :: YesodDB App (Entity Game)
 loadGameEntity = do
@@ -37,14 +31,15 @@ loadGameEntity = do
             return $ Entity newGid newGame 
 
 gameStateMessage :: GameState -> Text
-gameStateMessage (GameState _ Nothing) = "Make a guess!"
-gameStateMessage gameState@(GameState _ (Just (Guess _ word num))) =
-    case compare secret word of
-        LT -> [st|My word comes before "#{word}" in the dictionary.|]
-        GT -> [st|My word comes after "#{word}" in the dictionary.|]
-        EQ -> [st|You got it! The word was "#{secret}.
-                  You used #{show num} guesses."|]
-      where secret = stateSecret gameState
+gameStateMessage gameState = case stateLatestGuess gameState of
+    Nothing -> "Make a guess!"
+    Just Guess {guessWord = w, guessCount = c} ->
+        case compare secret w of
+            LT -> [st|My word comes before "#{w}" in the dictionary.|]
+            GT -> [st|My word comes after "#{w}" in the dictionary.|]
+            EQ -> [st|You got it! The word was "#{secret}".
+                      You used #{show c} guesses.|]
+          where secret = stateSecret gameState 
 
 guessForm :: Form Text
 guessForm = renderDivs $ areq textField "Guess" Nothing
@@ -60,10 +55,6 @@ postGameR = do
 updateWithGuess :: Text -> YesodDB App ()
 updateWithGuess word = do
     gameState <- loadGameState
-    let c = nextCount gameState
+    let c = stateGuessCount gameState + 1
         Entity gameId _ = stateGameEntity gameState
     insert_ $ Guess gameId word c
-
-nextCount :: GameState -> Int
-nextCount GameState {stateLatestGuess = Nothing} = 1
-nextCount GameState {stateLatestGuess = Just (Guess _ _ c)} = c + 1

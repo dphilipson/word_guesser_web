@@ -1,4 +1,4 @@
 <p>#{latestMessage}
-<form action=post action=@{GameR} enctype=#{formEnctype}>
+<form method=post target=@{GameR} enctype=#{formEnctype}>
   ^{formWidget}
   <input type=submit value="Guess">
