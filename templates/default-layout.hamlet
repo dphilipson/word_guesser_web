@@ -1,3 +1,11 @@
+<div #header>
+  $maybe username <- mUsername
+    <p>
+      Logged in as #{username}. #
+      <a href=@{AuthR LogoutR}>Logout</a>.
+  $nothing
+    <p>
+      <a href=@{AuthR LoginR}>Login</a>.
 $maybe msg <- mmsg
     <div #message>#{msg}
 ^{widget}

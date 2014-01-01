@@ -63,6 +63,8 @@ instance Yesod App where
     defaultLayout widget = do
         master <- getYesod
         mmsg <- getMessage
+        mEntity <- maybeAuth
+        let mUsername = fmap (userIdent . entityVal) mEntity
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
