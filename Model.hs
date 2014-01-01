@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module Model where
 
 import Prelude
@@ -10,5 +11,5 @@ import Data.Typeable (Typeable)
 -- You can find more information on persistent and how to declare entities
 -- at:
 -- http://www.yesodweb.com/book/persistent/
-share [mkPersist sqlOnlySettings, mkMigrate "migrateAll"]
+share [mkPersist sqlOnlySettings, mkDeleteCascade sqlOnlySettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")

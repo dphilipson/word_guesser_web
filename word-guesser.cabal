@@ -23,6 +23,7 @@ library
                      Game.Lexicon
                      Handler.Home
                      Handler.Game
+                     Handler.NewGame
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
