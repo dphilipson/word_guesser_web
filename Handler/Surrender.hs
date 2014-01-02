@@ -1,8 +1,8 @@
 module Handler.Surrender where
 
 import Import
+import Api.StatusResponse
 import Game.GameState
-import Game.StatusResponse
 import Yesod.Auth
 
 postSurrenderR :: Handler Value

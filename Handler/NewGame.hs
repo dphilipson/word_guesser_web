@@ -1,8 +1,8 @@
 module Handler.NewGame where
 
 import Import
+import Api.StatusResponse
 import Game.GameState
-import Game.StatusResponse
 import Yesod.Auth
 
 postNewGameR :: Handler Value

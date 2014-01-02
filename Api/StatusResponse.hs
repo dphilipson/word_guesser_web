@@ -1,4 +1,4 @@
-module Game.StatusResponse where
+module Api.StatusResponse where
 
 import Import
 import Game.GameState

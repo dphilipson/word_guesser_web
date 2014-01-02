@@ -1,9 +1,9 @@
 module Handler.Game where
 
 import Import
+import Api.StatusResponse
 import Game.GameState
 import Game.Lexicon
-import Game.StatusResponse
 import Text.Shakespeare.Text
 import Yesod.Auth
 

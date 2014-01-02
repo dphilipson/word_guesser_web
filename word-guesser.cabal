@@ -19,9 +19,9 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
+                     Api.StatusResponse
                      Game.GameState
                      Game.Lexicon
-                     Game.StatusResponse
                      Handler.Home
                      Handler.Game
                      Handler.NewGame
