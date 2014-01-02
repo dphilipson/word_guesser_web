@@ -1,7 +1,18 @@
-<p>#{latestMessage}
 $if not $ stateIsComplete gameState
   <form method=post action=@{GameR} enctype=#{formEnctype}>
     ^{formWidget}
     <input type=submit value="Guess">
 <form method=post action=@{NewGameR}>
   <input type=submit value="New game">
+
+<h3 .text-center>#{latestMessage}
+<div .row>
+  <div .col-lg-6 .col-lg-offset-3>
+    <div .input-group>
+      <input #guess-input type=text .form-control>
+      <span .input-group-btn>
+        <button #guess-button .btn .btn-default>Guess
+<div .row>
+  <div .col-lg-9 .col-lg-offset-3>
+    <p>Give up? Click to #
+      <a href="#" .text-danger>Surrender<a>.

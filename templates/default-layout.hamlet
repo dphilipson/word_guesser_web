@@ -1,11 +1,23 @@
-<div #header>
-  $maybe username <- mUsername
-    <p>
-      Logged in as #{username}. #
-      <a href=@{AuthR LogoutR}>Logout</a>.
-  $nothing
-    <p>
-      <a href=@{AuthR LoginR}>Login</a>.
-$maybe msg <- mmsg
-    <div #message>#{msg}
-^{widget}
+<div .navbar .navbar-inverse .navbar-static-top role=navigation>
+  <div .container>
+    <div .navbar-header>
+      <button type=button .navbar-toggle data-toggle=collapse data-target=".navbar-collapse">
+        <span .sr-only>Toggle navigation
+        <span .icon-bar>
+        <span .icon-bar>
+        <span .icon-bar>
+      <a .navbar-brand href=@{HomeR}>Word Guesser
+    <div .navbar-collapse .collapse>
+      <p .navbar-text .navbar-right>
+        $maybe username <- mUsername
+          <strong>#{username}</strong> | #
+          <a href=@{AuthR LogoutR}>Logout
+        $nothing
+          <a href=@{AuthR LoginR}>Login
+<div .container>
+  <div #main role=main>
+    $maybe msg <- mmsg
+        <div .alert .alert-danger>#{msg}
+    ^{widget}
+  <footer>
+    #{extraCopyright $ appExtra $ settings master}
