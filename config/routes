@@ -7,3 +7,4 @@
 / HomeR GET POST
 /game GameR GET POST
 /game/new NewGameR POST
+/game/surrender SurrenderR POST

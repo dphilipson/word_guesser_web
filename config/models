@@ -6,6 +6,7 @@ User
 Game
     owner UserId
     secret Text
+    surrendered Bool
     UniqueGame owner
 
 Guess

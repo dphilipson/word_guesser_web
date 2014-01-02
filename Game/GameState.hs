@@ -18,5 +18,11 @@ stateGuessCount = (maybe 0 guessCount) . stateLatestGuess
 stateLatestWord :: GameState -> Maybe Text
 stateLatestWord = (guessWord <$>) . stateLatestGuess
 
+stateIsWon :: GameState -> Bool
+stateIsWon state = stateLatestWord state == Just (stateSecret state)
+
+stateIsLost :: GameState -> Bool
+stateIsLost = gameSurrendered . entityVal . stateGameEntity
+
 stateIsComplete :: GameState -> Bool
-stateIsComplete state = stateLatestWord state == Just (stateSecret state)
+stateIsComplete state = stateIsWon state || stateIsLost state
