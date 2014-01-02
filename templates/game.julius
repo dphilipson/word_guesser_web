@@ -8,12 +8,31 @@
   $('#surrender-button').click(surrender);
   $('#new-game-button').click(startNewGame);
 
+  var disabled = false;
+
   function submitGuess() {
-    $.post('@{GameR}',
-           {guess: $('#guess-input').val()},
-           updateWithResponse,
-           "json");
-    $('#guess-input').val('');
+    if (!disabled && $.trim($('#guess-input').val()) !== '') {
+      $.post('@{GameR}',
+             {guess: $('#guess-input').val()},
+             function(r) {
+               updateWithResponse(r);
+               enableGuesses();
+             },
+             "json");
+      $('#guess-input').val('');
+      disableGuesses();
+      $('#guess-input').focus();
+    }
+  }
+
+  function disableGuesses() {
+    disabled = true;
+    $('#guess-button').addClass('disabled')
+  }
+
+  function enableGuesses() {
+    disabled = false;
+    $('#guess-button').removeClass('disabled')
   }
 
   function surrender() {

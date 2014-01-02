@@ -3,7 +3,7 @@ $with inProgress <- not $ stateIsComplete gameState
   <div #input-row .row :not inProgress:.hidden>
     <div .col-lg-6 .col-lg-offset-3>
       <div .input-group>
-        <input #guess-input type=text .form-control>
+        <input #guess-input type=text .form-control autofocus>
         <span .input-group-btn>
           <button #guess-button .btn .btn-default>Guess
   <div #surrender-row .row :not inProgress:.hidden>
