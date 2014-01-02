@@ -5,6 +5,7 @@ import Api.StatusResponse
 import Game.GameState
 import Game.Lexicon
 import Text.Shakespeare.Text
+import Util.Message
 import Yesod.Auth
 
 getGameR :: Handler Html
@@ -17,7 +18,9 @@ getGameR = do
             defaultLayout $ do
                 setTitle "Game - Word Guesser"
                 $(widgetFile "game")
-        Nothing -> redirect $ AuthR LoginR
+        Nothing -> do
+            setMessageWarning "You must login to play."
+            redirect $ AuthR LoginR
 
 guessForm :: Form Text
 guessForm = renderDivs $ areq textField "Guess" Nothing

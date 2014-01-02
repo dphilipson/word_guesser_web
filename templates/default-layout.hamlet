@@ -17,7 +17,7 @@
 <div .container>
   <div #main role=main>
     $maybe msg <- mmsg
-        <div .alert .alert-danger>#{msg}
+        #{msg}
     ^{widget}
   <hr>
   <footer>
