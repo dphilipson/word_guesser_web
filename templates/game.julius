@@ -1,12 +1,14 @@
 (function() {
-  $('#guess-button').click(submit);
+  $('#guess-button').click(submitGuess);
   $('#guess-input').keypress(function(e) {
     if (e.keyCode == 13) {
-      submit();
+      submitGuess();
     }
   });
+  $('#surrender-button').click(surrender);
+  $('#new-game-button').click(startNewGame);
 
-  function submit() {
+  function submitGuess() {
     $.post('@{GameR}',
            {guess: $('#guess-input').val()},
            updateWithResponse,
@@ -14,12 +16,26 @@
     $('#guess-input').val('');
   }
 
+  function surrender() {
+    $.post('@{SurrenderR}', "", updateWithResponse, "json");
+    $('#guess-input').val('');
+  }
+
+  function startNewGame() {
+    $.post('@{NewGameR}', "", updateWithResponse, "json");
+    $('#guess-input').val('');
+  }
+
   function updateWithResponse(r) {
     $('#game-message').text(r.message);
     if (r.status === "IN_PROGRESS") {
-      $('#input-row').removeClass('hidden')
+      $('#input-row').removeClass('hidden');
+      $('#surrender-row').removeClass('hidden');
+      $('#new-game-button').addClass('hidden');
     } else {
-      $('#input-row').addClass('hidden') 
+      $('#input-row').addClass('hidden');
+      $('#surrender-row').addClass('hidden');
+      $('#new-game-button').removeClass('hidden');
     }
   }
 })();

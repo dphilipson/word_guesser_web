@@ -1,16 +1,14 @@
-$if not $ stateIsComplete gameState
-  <form method=post action=@{SurrenderR}>
-    <input type=submit value="Surrender">
-<form method=post action=@{NewGameR}>
-  <input type=submit value="New game">
 <h3 #game-message .text-center>#{latestMessage}
-<div #input-row .row>
-  <div .col-lg-6 .col-lg-offset-3>
-    <div .input-group>
-      <input #guess-input type=text .form-control>
-      <span .input-group-btn>
-        <button #guess-button .btn .btn-default>Guess
-<div .row>
-  <div .col-lg-9 .col-lg-offset-3>
-    <p>Give up? Click to #
-      <a href="#" .text-danger>Surrender<a>.
+$with inProgress <- not $ stateIsComplete gameState
+  <div #input-row .row :not inProgress:.hidden>
+    <div .col-lg-6 .col-lg-offset-3>
+      <div .input-group>
+        <input #guess-input type=text .form-control>
+        <span .input-group-btn>
+          <button #guess-button .btn .btn-default>Guess
+  <div #surrender-row .row :not inProgress:.hidden>
+    <div .col-lg-9 .col-lg-offset-3>
+      <p>Give up? Click to #
+        <a #surrender-button href="javaScript:void(0)" .text-danger>Surrender<a>.
+  <button #new-game-button .btn .btn-primary .center-block :inProgress:.hidden>
+    New Game

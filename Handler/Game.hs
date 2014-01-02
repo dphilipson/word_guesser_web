@@ -3,6 +3,7 @@ module Handler.Game where
 import Import
 import Game.GameState
 import Game.Lexicon
+import Game.StatusResponse
 import Text.Shakespeare.Text
 import Yesod.Auth
 
@@ -18,46 +19,8 @@ getGameR = do
                 $(widgetFile "game")
         Nothing -> redirect $ AuthR LoginR
 
-loadGameState :: UserId -> YesodDB App GameState
-loadGameState userId = do
-    -- Assume just one game per user for now.
-    gameEntity@(Entity gid _) <- loadGameEntity userId
-    eLastGuess <- selectFirst [GuessGame ==. gid] [Desc GuessCount, LimitTo 1]
-    let lastGuess = fmap entityVal eLastGuess
-    return $ GameState gameEntity lastGuess
-    
--- Creates the game if none exists for now.
-loadGameEntity :: UserId -> YesodDB App (Entity Game)
-loadGameEntity userId = do
-    mGameEntity <- getBy $ UniqueGame userId
-    case mGameEntity of
-        Just entity -> return entity
-        Nothing -> do
-            lexicon <- lift getLexicon
-            newSecret <- liftIO $ randomSecret lexicon
-            let newGame = Game userId newSecret False
-            newGid <- insert newGame
-            return $ Entity newGid newGame 
-
 guessForm :: Form Text
 guessForm = renderDivs $ areq textField "Guess" Nothing
-
-data PostReturn = PostReturn { postMessage :: Text
-                             , postState :: Text
-                             }
-
-instance ToJSON PostReturn where
-    toJSON (PostReturn message status) =
-        object ["message" .= message, "status" .= status]
-
-fromGameState :: GameState -> PostReturn
-fromGameState state = PostReturn (gameMessage state) (statusEnum state)
-
-statusEnum :: GameState -> Text
-statusEnum state
-    | stateIsWon state = "WON"
-    | stateIsLost state = "LOST"
-    | otherwise = "IN_PROGRESS"
 
 postGameR :: Handler Value
 postGameR = do
@@ -75,22 +38,12 @@ postGameR = do
                             return $ toJSON $ fromGameState newState
                         else do
                             state <- runDB $ loadGameState userId
-                            return $ toJSON $ PostReturn [st|I don't know the word "#{word}". Try again.|] $ statusEnum state
-                _ -> fail "Wrong POST params"
-        Nothing -> fail "Not logged in"
-
-gameMessage :: GameState -> Text
-gameMessage state
-    | stateIsLost state  =
-        [st|The secret was #{secret}. Better luck next time!|]
-    | otherwise = case stateLatestWord state of
-        Just w -> case compare secret w of
-            LT -> [st|My word comes before "#{w}" in the dictionary.|]
-            GT -> [st|My word comes after "#{w}" in the dictionary.|]
-            EQ -> [st|You got it! The word was "#{secret}".
-                      You used #{show $ stateGuessCount state} guesses.|]
-        Nothing -> "I'm thinking of a word. Make a guess!"
-  where secret = stateSecret state
+                            return $ unknownWordResponse state word
+                _ -> return Null
+        Nothing -> return Null
+  where unknownWordResponse state word = toJSON
+            $ StatusResponse  [st|I don't know the word "#{word}". Try again.|]
+            $ statusEnum state
 
 insertGuessAndGet :: UserId -> Text -> YesodDB App GameState
 insertGuessAndGet userId word = do

@@ -1,16 +1,20 @@
 module Handler.NewGame where
 
 import Import
+import Game.GameState
+import Game.StatusResponse
 import Yesod.Auth
 
-postNewGameR :: Handler Html
+postNewGameR :: Handler Value
 postNewGameR = do
     mUserId <- maybeAuthId
     case mUserId of
         Just userId -> do
-            runDB $ deleteGame userId
-            redirect GameR
-        Nothing -> redirect $ AuthR LoginR
+            runDB $ do
+                deleteGame userId
+                state <- loadGameState userId
+                return $ toJSON $ fromGameState $ state
+        Nothing -> return Null
 
 deleteGame :: UserId -> YesodDB App ()
 deleteGame userId = do

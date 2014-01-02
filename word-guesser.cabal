@@ -21,6 +21,7 @@ library
                      Settings.Development
                      Game.GameState
                      Game.Lexicon
+                     Game.StatusResponse
                      Handler.Home
                      Handler.Game
                      Handler.NewGame

@@ -1,16 +1,20 @@
 module Handler.Surrender where
 
 import Import
+import Game.GameState
+import Game.StatusResponse
 import Yesod.Auth
 
-postSurrenderR :: Handler Html
+postSurrenderR :: Handler Value
 postSurrenderR = do
     mUserId <- maybeAuthId
     case mUserId of
         Just userId -> do
-            runDB $ surrender userId
-            redirect GameR
-        Nothing -> redirect $ AuthR LoginR
+            runDB $ do
+                surrender userId
+                state <- loadGameState userId
+                return $ toJSON $ fromGameState $ state
+        Nothing -> return Null
 
 surrender :: UserId -> YesodDB App ()
 surrender userId = updateWhere [GameOwner ==. userId] [GameSurrendered =. True]
