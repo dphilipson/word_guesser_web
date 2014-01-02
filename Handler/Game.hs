@@ -12,8 +12,7 @@ getGameR = do
     case mUserId of
         Just userId -> do
             gameState <- runDB $ loadGameState userId
-            let latestMessage = gameStateMessage gameState    
-            (formWidget, formEnctype) <- generateFormPost guessForm
+            let latestMessage = gameMessage gameState
             defaultLayout $ do
                 setTitle "Game - Word Guesser"
                 $(widgetFile "game")
@@ -40,45 +39,46 @@ loadGameEntity userId = do
             newGid <- insert newGame
             return $ Entity newGid newGame 
 
-gameStateMessage :: GameState -> Text
-gameStateMessage gameState
-    | stateIsLost gameState =
-        [st|The secret was "#{secret}". Better luck next time!|]
-    | otherwise =
-        case stateLatestGuess gameState of
-        Nothing -> "Make a guess!"
-        Just Guess {guessWord = w, guessCount = c} ->
-            case compare secret w of
-                LT -> [st|My word comes before "#{w}" in the dictionary.|]
-                GT -> [st|My word comes after "#{w}" in the dictionary.|]
-                EQ -> [st|You got it! The word was "#{secret}".
-                          You used #{show c} guesses.|]
-      where secret = stateSecret gameState 
-
 guessForm :: Form Text
 guessForm = renderDivs $ areq textField "Guess" Nothing
 
-postGameR :: Handler Html
+postGameR :: Handler Text
 postGameR = do
     mUserId <- maybeAuthId
     case mUserId of
         Just userId -> do
-            ((result, _), _) <- runFormPost guessForm
-            case result of
-                FormSuccess rawWord -> do
+            guessParams <- lookupPostParams "guess"
+            case guessParams of
+                rawWord : _ -> do
                     let word = canonicalize rawWord
                     lexicon <- getLexicon
                     if isValidGuess word lexicon
-                        then runDB $ updateWithGuess userId word
-                        else setMessage $ toHtml
+                        then do
+                            newState <- runDB $ insertGuessAndGet userId word
+                            return $ gameMessage newState
+                        else return  
                             [st|I don't know the word "#{word}". Try again.|]
-                _ -> return ()
-        Nothing -> return ()
-    redirect GameR
+                _ -> return "Error: wrong POST params"
+        Nothing -> return "Error: not logged in"
 
-updateWithGuess :: UserId -> Text -> YesodDB App ()
-updateWithGuess userId word = do
+gameMessage :: GameState -> Text
+gameMessage state
+    | stateIsLost state  =
+        [st|The secret was #{secret}. Better luck next time!|]
+    | otherwise = case stateLatestWord state of
+        Just w -> case compare secret w of
+            LT -> [st|My word comes before "#{w}" in the dictionary.|]
+            GT -> [st|My word comes after "#{w}" in the dictionary.|]
+            EQ -> [st|You got it! The word was "#{secret}".
+                      You used #{show $ stateGuessCount state} guesses.|]
+        Nothing -> "I'm thinking of a word. Make a guess!"
+  where secret = stateSecret state
+
+insertGuessAndGet :: UserId -> Text -> YesodDB App GameState
+insertGuessAndGet userId word = do
     gameState <- loadGameState userId
     let c = stateGuessCount gameState + 1
         gameId = entityKey $ stateGameEntity gameState
+        newGuess = Guess gameId word c
     insert_ $ Guess gameId word c
+    return gameState {stateLatestGuess = Just newGuess}

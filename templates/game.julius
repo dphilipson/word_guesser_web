@@ -1,0 +1,9 @@
+(function() {
+  $('#guess-button').click(submit);
+
+  function submit() {
+    $.post('@{GameR}', {guess: $('#guess-input').val()}, function(text) {
+      $('#game-message').text(text);
+    }, "text");
+  }
+})();
