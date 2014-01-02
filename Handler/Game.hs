@@ -42,7 +42,24 @@ loadGameEntity userId = do
 guessForm :: Form Text
 guessForm = renderDivs $ areq textField "Guess" Nothing
 
-postGameR :: Handler Text
+data PostReturn = PostReturn { postMessage :: Text
+                             , postState :: Text
+                             }
+
+instance ToJSON PostReturn where
+    toJSON (PostReturn message status) =
+        object ["message" .= message, "status" .= status]
+
+fromGameState :: GameState -> PostReturn
+fromGameState state = PostReturn (gameMessage state) (statusEnum state)
+
+statusEnum :: GameState -> Text
+statusEnum state
+    | stateIsWon state = "WON"
+    | stateIsLost state = "LOST"
+    | otherwise = "IN_PROGRESS"
+
+postGameR :: Handler Value
 postGameR = do
     mUserId <- maybeAuthId
     case mUserId of
@@ -55,11 +72,12 @@ postGameR = do
                     if isValidGuess word lexicon
                         then do
                             newState <- runDB $ insertGuessAndGet userId word
-                            return $ gameMessage newState
-                        else return  
-                            [st|I don't know the word "#{word}". Try again.|]
-                _ -> return "Error: wrong POST params"
-        Nothing -> return "Error: not logged in"
+                            return $ toJSON $ fromGameState newState
+                        else do
+                            state <- runDB $ loadGameState userId
+                            return $ toJSON $ PostReturn [st|I don't know the word "#{word}". Try again.|] $ statusEnum state
+                _ -> fail "Wrong POST params"
+        Nothing -> fail "Not logged in"
 
 gameMessage :: GameState -> Text
 gameMessage state

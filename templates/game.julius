@@ -1,9 +1,25 @@
 (function() {
   $('#guess-button').click(submit);
+  $('#guess-input').keypress(function(e) {
+    if (e.keyCode == 13) {
+      submit();
+    }
+  });
 
   function submit() {
-    $.post('@{GameR}', {guess: $('#guess-input').val()}, function(text) {
-      $('#game-message').text(text);
-    }, "text");
+    $.post('@{GameR}',
+           {guess: $('#guess-input').val()},
+           updateWithResponse,
+           "json");
+    $('#guess-input').val('');
+  }
+
+  function updateWithResponse(r) {
+    $('#game-message').text(r.message);
+    if (r.status === "IN_PROGRESS") {
+      $('#input-row').removeClass('hidden')
+    } else {
+      $('#input-row').addClass('hidden') 
+    }
   }
 })();

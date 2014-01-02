@@ -4,13 +4,12 @@ $if not $ stateIsComplete gameState
 <form method=post action=@{NewGameR}>
   <input type=submit value="New game">
 <h3 #game-message .text-center>#{latestMessage}
-$if not $ stateIsComplete gameState
-  <div .row>
-    <div .col-lg-6 .col-lg-offset-3>
-      <div .input-group>
-        <input #guess-input type=text .form-control>
-        <span .input-group-btn>
-          <button #guess-button .btn .btn-default>Guess
+<div #input-row .row>
+  <div .col-lg-6 .col-lg-offset-3>
+    <div .input-group>
+      <input #guess-input type=text .form-control>
+      <span .input-group-btn>
+        <button #guess-button .btn .btn-default>Guess
 <div .row>
   <div .col-lg-9 .col-lg-offset-3>
     <p>Give up? Click to #
