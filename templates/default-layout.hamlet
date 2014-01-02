@@ -19,5 +19,6 @@
     $maybe msg <- mmsg
         <div .alert .alert-danger>#{msg}
     ^{widget}
+  <hr>
   <footer>
-    #{extraCopyright $ appExtra $ settings master}
+    <p .text-muted>#{extraCopyright $ appExtra $ settings master}

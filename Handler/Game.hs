@@ -14,7 +14,9 @@ getGameR = do
             gameState <- runDB $ loadGameState userId
             let latestMessage = gameStateMessage gameState    
             (formWidget, formEnctype) <- generateFormPost guessForm
-            defaultLayout $(widgetFile "game")
+            defaultLayout $ do
+                setTitle "Game - Word Guesser"
+                $(widgetFile "game")
         Nothing -> redirect $ AuthR LoginR
 
 loadGameState :: UserId -> YesodDB App GameState

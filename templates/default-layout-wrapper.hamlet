@@ -9,6 +9,7 @@ $newline never
         <meta charset="UTF-8">
 
         <title>#{pageTitle pc}
+        <link rel="shortcut icon" href=@{FaviconR}>
         <meta name="description" content="">
         <meta name="author" content="">
 
