@@ -19,7 +19,7 @@ getGameR = do
                 setTitle "Game - Word Guesser"
                 $(widgetFile "game")
         Nothing -> do
-            setMessageWarning "You must login to play."
+            setMessageWarning "You must log in to play."
             redirect $ AuthR LoginR
 
 guessForm :: Form Text

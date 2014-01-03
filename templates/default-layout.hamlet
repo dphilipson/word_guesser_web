@@ -8,12 +8,15 @@
         <span .icon-bar>
       <a .navbar-brand href=@{HomeR}>Word Guesser
     <div .navbar-collapse .collapse>
+      <ul class="nav navbar-nav">
+        <li>
+          <a href=@{GameR}>Play
       <p .navbar-text .navbar-right>
         $maybe username <- mUsername
           <strong>#{username}</strong> | #
-          <a href=@{AuthR LogoutR}>Logout
+          <a href=@{AuthR LogoutR}>Log out
         $nothing
-          <a href=@{AuthR LoginR}>Login
+          <a href=@{AuthR LoginR}>Log in
 <div .container>
   <div #main role=main>
     $maybe msg <- mmsg

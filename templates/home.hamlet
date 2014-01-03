@@ -1,0 +1,18 @@
+<div .jumbotron>
+  <div .container>
+    <h1 .text-center>Word Guesser
+    <p>Word Guesser is a word game played in your browser. I will choose a
+      \ secret word for you to guess. After each guess you make, I will tell you
+      \ if my word comes before or after your guess alphabetically. Note that
+      \ you can only guess actual words! Can you figure out my secret in as few
+      \ guesses as possible?
+    $if loggedIn
+      <h3 .text-center>Start playing now!
+      <p .text-center>
+        <a href=@{GameR} .btn .btn-primary>
+          Play
+    $else
+      <h3 .text-center>To get started, log in.
+      <p .text-center>
+        <a href=@{AuthR LoginR} .btn .btn-primary>
+          Log in 

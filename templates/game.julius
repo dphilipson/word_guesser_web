@@ -41,7 +41,13 @@
   }
 
   function startNewGame() {
-    $.post('@{NewGameR}', "", updateWithResponse, "json");
+    $.post('@{NewGameR}',
+           "",
+           function(r) {
+             updateWithResponse(r);
+             $('#guess-input').focus();
+           },
+           "json");
     $('#guess-input').val('');
   }
 
