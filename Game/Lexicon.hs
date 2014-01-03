@@ -5,6 +5,7 @@ module Game.Lexicon
     , isValidGuess
     , canonicalize
     , loadLexicon
+    , defaultLexicon
     ) where
 
 -- Don't import Import because of circular dependency.
@@ -46,3 +47,8 @@ canonicalize = T.toLower . T.strip
 
 selectRandom :: Vector Text -> IO Text
 selectRandom v = ((v !) . fst . randomR (0, V.length v - 1)) <$> newStdGen
+
+defaultLexicon :: IO Lexicon
+defaultLexicon = Lexicon
+    <$> fmap (V.slice 1000 2000) (linesVector "lexicons/common.txt")
+    <*> linesSet "lexicons/scrabble.txt"

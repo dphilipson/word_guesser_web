@@ -84,8 +84,7 @@ makeFoundation conf = do
     loggerSet' <- newLoggerSet defaultBufSize Nothing
     (getter, _) <- clockDateCacher
 
-    lexicon <-
-        loadLexicon "lexicons/color_secrets.txt" "lexicons/color_guesses.txt"
+    lexicon <- defaultLexicon
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
         foundation = App conf s p manager dbconf logger lexicon

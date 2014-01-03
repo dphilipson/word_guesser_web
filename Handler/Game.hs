@@ -44,9 +44,10 @@ postGameR = do
                             return $ unknownWordResponse state word
                 _ -> return Null
         Nothing -> return Null
-  where unknownWordResponse state word = toJSON
-            $ StatusResponse  [st|I don't know the word "#{word}". Try again.|]
-            $ statusEnum state
+  where
+    unknownWordResponse state word = toJSON
+        $ StatusResponse [st|I don't know the word "#{word}". Try again.|]
+        $ statusEnum state
 
 insertGuessAndGet :: UserId -> Text -> YesodDB App GameState
 insertGuessAndGet userId word = do

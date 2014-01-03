@@ -23,8 +23,8 @@ statusEnum state
 
 gameMessage :: GameState -> Text
 gameMessage state
-    | stateIsLost state  =
-        [st|The secret was #{secret}. Better luck next time!|]
+    | stateIsLost state =
+        [st|The secret was "#{secret}". Better luck next time!|]
     | otherwise = case stateLatestWord state of
         Just w -> case compare secret w of
             LT -> [st|My word comes before "#{w}" in the dictionary.|]
@@ -32,6 +32,7 @@ gameMessage state
             EQ -> [st|You got it! The word was "#{secret}".
                       You used #{show $ stateGuessCount state} guesses.|]
         Nothing -> "I'm thinking of a word. Make a guess!"
-  where secret = stateSecret state
+  where
+    secret = stateSecret state
 
 
