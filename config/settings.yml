@@ -15,5 +15,5 @@ Staging:
   <<: *defaults
 
 Production:
-  approot: "http://word-guesser.herokuapp.com/"
+  approot: "http://word-guesser.herokuapp.com"
   <<: *defaults
